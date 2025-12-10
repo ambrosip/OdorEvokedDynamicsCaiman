@@ -8,7 +8,6 @@ def get_temp_movies(
     step=1,
     downsample_ratio=0.1,
     rigid=False,
-    batch_size=3,
 ):
     path = Path.home() / "caiman_data" / "temp"
 
@@ -21,18 +20,9 @@ def get_temp_movies(
     print(f"Processing file: {filenames[0]}")
     movie_chain = cm.load(filenames[0]).resize(1, 1, downsample_ratio)
 
-    for batch in batched(filenames[1:], batch_size):
-        batch_movies = [movie_chain]
-
-        for filename in batch:
-            print(f"Processing file: {filename}")
-            batch_movies.append(cm.load(filename).resize(1, 1, downsample_ratio))
-
-        movie_chain = cm.concatenate(batch_movies, axis=0)
+    for filename in filenames[1:]:
+        print(f"Processing file: {filename}")
+        movie = cm.load(filename).resize(1, 1, downsample_ratio)
+        movie_chain = cm.concatenate([movie_chain, movie], axis=0)
 
     return movie_chain
-
-
-def batched(full_list, batch_size):
-    for index in range(0, len(full_list), batch_size):
-        yield full_list[index : index + batch_size]
